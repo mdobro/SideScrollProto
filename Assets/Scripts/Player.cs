@@ -62,13 +62,13 @@ public class Player : MonoBehaviour {
         jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
         if (grounded) {
             print("Jump");
-            rigid.AddForce(Vector3.up * jumpVel, ForceMode.VelocityChange);
+            rigid.velocity = new Vector3(rigid.velocity.x, jumpVel, 0);
         } else if (wallRight) {
             print("Wall Jump from right wall");
-            rigid.AddForce(new Vector3(-wallJumpHorzVel, wallJumpVertVel, 0), ForceMode.VelocityChange);
+            rigid.velocity = new Vector3(-wallJumpHorzVel, wallJumpVertVel, 0);
         } else if (wallLeft) {
             print("Wall Jump from left wall");
-            rigid.AddForce(new Vector3(wallJumpHorzVel, wallJumpVertVel, 0), ForceMode.VelocityChange);
+            rigid.velocity = new Vector3(wallJumpHorzVel, wallJumpVertVel, 0);
         }
     }
 
