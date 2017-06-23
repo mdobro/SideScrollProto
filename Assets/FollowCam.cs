@@ -18,8 +18,10 @@ public class FollowCam : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         //keep Y position const
-        Vector3 newPos = player.transform.position + offset;
-        newPos.y = offset.y;    
-        transform.position = newPos;
+        if (player != null) {
+            Vector3 newPos = player.transform.position + offset;
+            newPos.y = offset.y;
+            transform.position = newPos;
+        }
 	}
 }

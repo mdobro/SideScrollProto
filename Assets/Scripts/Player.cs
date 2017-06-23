@@ -4,27 +4,31 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
+    public static Vector3 respawnLocation;
+
     public float maxSpeed;
     public float jumpVel;
     public float hangTime;
     public float wallJumpVertVel;
     public float wallJumpHorzVel;
     public float rayLengthOutsideOfPlayer;
-
+    public float respawnDelay;
+    
     public bool _______________________;
 
     Rigidbody rigid;    
-    SphereCollider coll;
+    SphereCollider playerColl;
     ConstantForce moveForward;
     bool grounded;
     bool jumping = false;
-    Vector3 counterGravity = -Physics.gravity * 2; 
+    Vector3 counterGravity = -Physics.gravity * 2;
 
     // Use this for initialization
     void Start () {
         rigid = GetComponent<Rigidbody>();
-        coll = GetComponent<SphereCollider>();
+        playerColl = GetComponent<SphereCollider>();
         moveForward = GetComponent<ConstantForce>();
+        respawnLocation = transform.position;
     }
 	
 	// Update is called once per frame
@@ -33,7 +37,7 @@ public class Player : MonoBehaviour {
 	}
 
     void FixedUpdate () {
-        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), coll.radius + rayLengthOutsideOfPlayer);
+        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer);
         
         if (!grounded) {
             //stop applying force if not grounded
@@ -53,12 +57,19 @@ public class Player : MonoBehaviour {
         //print(rigid.velocity);
     }
 
+    public void OnTriggerEnter(Collider coll) {
+        if (coll.tag == "Hazard") {
+            MainGameController.S.RespawnWithDelay(respawnDelay);
+            Destroy(this.gameObject);
+        }
+    }
+
     //called by an event trigger attached to "Event Grabber"
     public void PointerDown() {
         //if on ground, jump
-        grounded = Physics.Raycast(transform.position, Vector3.down, coll.radius + rayLengthOutsideOfPlayer);
-        bool wallRight = Physics.Raycast(transform.position, Vector3.right, coll.radius + rayLengthOutsideOfPlayer);
-        bool wallLeft = Physics.Raycast(transform.position, Vector3.left, coll.radius + rayLengthOutsideOfPlayer);
+        grounded = Physics.Raycast(transform.position, Vector3.down, playerColl.radius + rayLengthOutsideOfPlayer);
+        bool wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer);
+        bool wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer);
         jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
         if (grounded) {
             print("Jump");
@@ -72,6 +83,7 @@ public class Player : MonoBehaviour {
         }
     }
 
+    //called by an event trigger attached to "Event Grabber"
     public void PointerUp() {
         print("Stop Jumping");
         jumping = false;
