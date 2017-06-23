@@ -4,20 +4,25 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-    public float movementSpeed;
-    public float jumpForce;
-    public float wallJumpForce;
+    public float maxSpeed;
+    public float jumpVel;
+    public float wallJumpVertVel;
+    public float wallJumpHorzVel;
     public float rayLengthOutsideOfPlayer;
 
     public bool _______________________;
 
-    Rigidbody rigid;
+    Rigidbody rigid;    
     SphereCollider coll;
+    ConstantForce moveForward;
+    bool grounded;
+    Vector3 counterGravity = -Physics.gravity * 2; 
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
         rigid = GetComponent<Rigidbody>();
         coll = GetComponent<SphereCollider>();
+        moveForward = GetComponent<ConstantForce>();
     }
 	
 	// Update is called once per frame
@@ -26,28 +31,37 @@ public class Player : MonoBehaviour {
 	}
 
     void FixedUpdate () {
-        Vector3 movement = new Vector3(1, 0, 0);
-        rigid.AddForce(movement * movementSpeed * Time.deltaTime);
-
+        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), coll.radius + rayLengthOutsideOfPlayer);
+        
+        if (!grounded) {
+            //stop applying force if not grounded
+            moveForward.enabled = false;
+        } else {
+            //move forward
+            moveForward.enabled = true;
+        }
+        if (rigid.velocity.x > maxSpeed) {
+            Vector3 maxVel = new Vector3(maxSpeed, rigid.velocity.y, 0);
+            rigid.velocity = maxVel;
+        }
+        print(rigid.velocity);
     }
 
+    //called by an event trigger attached to "Event Grabber"
     public void PointerDown() {
         //if on ground, jump
-        bool grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), coll.radius + rayLengthOutsideOfPlayer);
+        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), coll.radius + rayLengthOutsideOfPlayer);
         bool wallRight = Physics.Raycast(transform.position, new Vector3(1, 0, 0), coll.radius + rayLengthOutsideOfPlayer);
         bool wallLeft = Physics.Raycast(transform.position, new Vector3(-1, 0, 0), coll.radius + rayLengthOutsideOfPlayer);
         if (grounded) {
             print("Jump");
-            Vector3 jump = new Vector3(0, 1, 0);
-            rigid.AddForce(jump * jumpForce, ForceMode.Impulse);
+            rigid.velocity = new Vector3(rigid.velocity.x, jumpVel, 0);
         } else if (wallRight) {
             print("Wall Jump from right wall");
-            Vector3 wallJump = new Vector3(-1, 1, 0);
-            rigid.AddForce(wallJump * wallJumpForce, ForceMode.Impulse);
+            rigid.velocity = new Vector3(-wallJumpHorzVel, wallJumpVertVel, 0);
         } else if (wallLeft) {
             print("Wall Jump from left wall");
-            Vector3 wallJump = new Vector3(1, 1, 0);
-            rigid.AddForce(wallJump * wallJumpForce, ForceMode.Impulse);
+            rigid.velocity = new Vector3(wallJumpHorzVel, wallJumpVertVel, 0);
         }
         
     }
