@@ -18,4 +18,4 @@ Enemies/Obstacles:
   - laser bullets
   - switch\button controlled obstacles
   - trampolines
-  - 
+  - destructable walls? 
