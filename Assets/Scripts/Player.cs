@@ -5,15 +5,14 @@ using UnityEngine;
 public class Player : MonoBehaviour {
 
     public float maxSpeed;
-    public float jumpVel;
-    public float hangTime;
+    public float tapJumpVelocity;
+    public float holdJumpVelocity;
     public float wallJumpVertVel;
     public float wallJumpHorzVel;
     public float rayLengthOutsideOfPlayer;
     public float respawnDelay;
     public float deathHeight; //Y value at which the player dies and respawns at the last checkpoint
     public float gravIncrease;
-    public float speedWhereGravIncreaseApplies;
     public float speedWhereHoldToJumpCancels;
     public float wallFrictionForce;
     
@@ -55,18 +54,18 @@ public class Player : MonoBehaviour {
         if (!grounded) {
             //IN AIR
             moveForward.enabled = false;
-            if (jumping && rigid.velocity.y < speedWhereGravIncreaseApplies && rigid.velocity.y > speedWhereHoldToJumpCancels && !(rigid.velocity.y <= 0 && wallLeft || wallRight)) {
+
+            //increase gravity
+            rigid.AddForce(Vector3.down * gravIncrease, ForceMode.Force);
+
+            if (jumping && rigid.velocity.y > speedWhereHoldToJumpCancels && !(rigid.velocity.y <= 0 && wallLeft || wallRight)) {
                 //hold to jump higher
-                rigid.AddForce(Vector3.up * hangTime, ForceMode.Acceleration);
-            }
-            if (rigid.velocity.y < speedWhereGravIncreaseApplies) {
-                //increase gravity
-                rigid.AddForce(Vector3.down * gravIncrease, ForceMode.Acceleration);
+                rigid.AddForce(Vector3.up * holdJumpVelocity, ForceMode.Force);
             }
             if ((wallRight || wallLeft) && rigid.velocity.y < 0) {
                 //apply wall friction force to allow "hugging" and slow sliding down walls
                 rigid.AddForce((wallRight ? Vector3.right : Vector3.left) * 1000f, ForceMode.Acceleration);
-                rigid.AddForce(Vector3.up * wallFrictionForce, ForceMode.Acceleration);
+                rigid.AddForce(Vector3.up * wallFrictionForce, ForceMode.Force);
             }
         } else {
             //move forward
@@ -107,7 +106,7 @@ public class Player : MonoBehaviour {
         jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
         if (grounded) {
             print("Jump");
-            rigid.velocity = new Vector3(rigid.velocity.x, jumpVel, 0);
+            rigid.velocity = new Vector3(rigid.velocity.x, tapJumpVelocity, 0);
         } else if (wallRight) {
             print("Wall Jump from right wall");
             rigid.velocity = new Vector3(-wallJumpHorzVel, wallJumpVertVel, 0);
