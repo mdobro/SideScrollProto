@@ -12,6 +12,9 @@ public class Player : MonoBehaviour {
     public float rayLengthOutsideOfPlayer;
     public float respawnDelay;
     public float deathHeight; //Y value at which the player dies and respawns at the last checkpoint
+    public float gravIncrease;
+    public float speedWhereGravIncreaseApplies;
+    public float speedWhereHoldToJumpCancels;
     
     public bool _______________________;
 
@@ -21,6 +24,8 @@ public class Player : MonoBehaviour {
     SphereCollider playerColl;
     ConstantForce moveForward;
     bool grounded;
+    bool wallLeft;
+    bool wallRight;
     bool jumping = false;
 
     // Use this for initialization
@@ -38,6 +43,8 @@ public class Player : MonoBehaviour {
 
     void FixedUpdate () {
         grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer);
+        wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer);
+        wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer);
 
         if (transform.position.y < deathHeight) {
             //player has fallen off map, respawn
@@ -45,14 +52,21 @@ public class Player : MonoBehaviour {
         }
         
         if (!grounded) {
-            //stop applying force if not grounded
+            //IN AIR
             moveForward.enabled = false;
-            //if user is holding down jump, accelerate
-            if (jumping) {
+            if (jumping && rigid.velocity.y < speedWhereGravIncreaseApplies && rigid.velocity.y > speedWhereHoldToJumpCancels) {
+                //hold to jump higher
                 rigid.AddForce(Vector3.up * hangTime, ForceMode.Acceleration);
+            }
+            if (rigid.velocity.y < speedWhereGravIncreaseApplies) {
+                //increase gravity
+                float downForce = wallLeft || wallRight ? gravIncrease * 1 / 3 : gravIncrease;
+                rigid.AddForce(Vector3.down * downForce, ForceMode.Acceleration);
             }
         } else {
             //move forward
+            if (rigid.velocity.y < 0)
+                rigid.velocity = new Vector3(rigid.velocity.x, 0, 0); //cancel downward force
             moveForward.enabled = true;
         }
         if (rigid.velocity.x > maxSpeed) {
@@ -82,8 +96,8 @@ public class Player : MonoBehaviour {
     public void PointerDown() {
         //if on ground, jump
         grounded = Physics.Raycast(transform.position, Vector3.down, playerColl.radius + rayLengthOutsideOfPlayer);
-        bool wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer);
-        bool wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer);
+        wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer);
+        wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer);
         jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
         if (grounded) {
             print("Jump");
