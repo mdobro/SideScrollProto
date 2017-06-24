@@ -23,7 +23,7 @@ public class MainGameController : MonoBehaviour {
     }
 
     private void RespawnPlayer() {
-        player.transform.position = Player.respawnLocation;
+        player.transform.position = player.GetComponent<Player>().respawnLocation;
         player.SetActive(true);
     }
 }

@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-    public static Vector3 respawnLocation;
-
     public float maxSpeed;
     public float jumpVel;
     public float hangTime;
@@ -16,6 +14,8 @@ public class Player : MonoBehaviour {
     public float deathHeight; //Y value at which the player dies and respawns at the last checkpoint
     
     public bool _______________________;
+
+    public Vector3 respawnLocation;
 
     Rigidbody rigid;    
     SphereCollider playerColl;
@@ -66,10 +66,15 @@ public class Player : MonoBehaviour {
         if (coll.tag == "Hazard") {
             Respawn();
         }
+        if (coll.tag == "Checkpoint") {
+            respawnLocation = coll.transform.position;
+        }
     }
 
     private void Respawn() {
         MainGameController.S.RespawnWithDelay(respawnDelay);
+        jumping = false;
+        rigid.velocity = Vector3.zero;
         gameObject.SetActive(false);
     }
 
