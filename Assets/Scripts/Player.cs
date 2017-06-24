@@ -14,7 +14,8 @@ public class Player : MonoBehaviour {
     public float deathHeight; //Y value at which the player dies and respawns at the last checkpoint
     public float gravIncrease;
     public float speedWhereHoldToJumpCancels;
-    public float wallFrictionForce;
+    public float wallUpwardForce;
+    public float wallHugForce;
     
     public bool _______________________;
 
@@ -64,8 +65,8 @@ public class Player : MonoBehaviour {
             }
             if ((wallRight || wallLeft) && rigid.velocity.y < 0) {
                 //apply wall friction force to allow "hugging" and slow sliding down walls
-                rigid.AddForce((wallRight ? Vector3.right : Vector3.left) * 1000f, ForceMode.Acceleration);
-                rigid.AddForce(Vector3.up * wallFrictionForce, ForceMode.Force);
+                rigid.AddForce((wallRight ? Vector3.right : Vector3.left) * wallHugForce, ForceMode.Acceleration);
+                rigid.AddForce(Vector3.up * wallUpwardForce, ForceMode.Force);
             }
         } else {
             //move forward

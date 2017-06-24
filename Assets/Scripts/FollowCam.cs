@@ -7,6 +7,7 @@ public class FollowCam : MonoBehaviour {
     public GameObject player;
     public Vector3 offset;
     public float maxPlayerYBeforeFollowing;
+    public float yPadding;
 
 	// Use this for initialization
 	void Start () {
@@ -21,6 +22,7 @@ public class FollowCam : MonoBehaviour {
         if (player != null) {
             Vector3 camPos = transform.position;
             camPos.x = player.transform.position.x + offset.x;
+            //if camPos is outside of the current position + padding, change to that new position otherwise remain stationary
             transform.position = camPos;
         }
 	}
