@@ -5,23 +5,23 @@ using UnityEngine;
 public class FollowCam : MonoBehaviour {
 
     public GameObject player;
-
     public Vector3 offset;
+    public float maxPlayerYBeforeFollowing;
 
 	// Use this for initialization
 	void Start () {
-        float y = transform.position.y;
-        offset = transform.position - player.transform.position;
-        offset.y = y;
+        if (offset.z == 0)
+            offset.z = transform.position.z; //use the natural camera Z position unless explicitly set
+        transform.position = player.transform.position + offset;
 	}
 	
 	// Update is called once per frame
 	void Update () {
         //keep Y position const
         if (player != null) {
-            Vector3 newPos = player.transform.position + offset;
-            newPos.y = offset.y;
-            transform.position = newPos;
+            Vector3 camPos = transform.position;
+            camPos.x = player.transform.position.x + offset.x;
+            transform.position = camPos;
         }
 	}
 }

@@ -15,6 +15,7 @@ public class Player : MonoBehaviour {
     public float gravIncrease;
     public float speedWhereGravIncreaseApplies;
     public float speedWhereHoldToJumpCancels;
+    public float wallFrictionForce;
     
     public bool _______________________;
 
@@ -42,9 +43,9 @@ public class Player : MonoBehaviour {
 	}
 
     void FixedUpdate () {
-        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer);
-        wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer);
-        wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer);
+        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Default"));
+        wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Default"));
+        wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Default"));
 
         if (transform.position.y < deathHeight) {
             //player has fallen off map, respawn
@@ -54,19 +55,24 @@ public class Player : MonoBehaviour {
         if (!grounded) {
             //IN AIR
             moveForward.enabled = false;
-            if (jumping && rigid.velocity.y < speedWhereGravIncreaseApplies && rigid.velocity.y > speedWhereHoldToJumpCancels) {
+            if (jumping && rigid.velocity.y < speedWhereGravIncreaseApplies && rigid.velocity.y > speedWhereHoldToJumpCancels && !(rigid.velocity.y <= 0 && wallLeft || wallRight)) {
                 //hold to jump higher
                 rigid.AddForce(Vector3.up * hangTime, ForceMode.Acceleration);
             }
             if (rigid.velocity.y < speedWhereGravIncreaseApplies) {
                 //increase gravity
-                float downForce = wallLeft || wallRight ? gravIncrease * 1 / 3 : gravIncrease;
-                rigid.AddForce(Vector3.down * downForce, ForceMode.Acceleration);
+                rigid.AddForce(Vector3.down * gravIncrease, ForceMode.Acceleration);
+            }
+            if ((wallRight || wallLeft) && rigid.velocity.y < 0) {
+                //apply wall friction force to allow "hugging" and slow sliding down walls
+                rigid.AddForce((wallRight ? Vector3.right : Vector3.left) * 1000f, ForceMode.Acceleration);
+                rigid.AddForce(Vector3.up * wallFrictionForce, ForceMode.Acceleration);
             }
         } else {
             //move forward
-            if (rigid.velocity.y < 0)
+            if (rigid.velocity.y < 0) {
                 rigid.velocity = new Vector3(rigid.velocity.x, 0, 0); //cancel downward force
+            }
             moveForward.enabled = true;
         }
         if (rigid.velocity.x > maxSpeed) {
