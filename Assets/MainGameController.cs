@@ -6,7 +6,7 @@ public class MainGameController : MonoBehaviour {
 
     public static MainGameController S;
 
-    public GameObject playerPrefab;
+    public GameObject player;
 
 	// Use this for initialization
 	void Start () {
@@ -23,7 +23,7 @@ public class MainGameController : MonoBehaviour {
     }
 
     private void RespawnPlayer() {
-        GameObject player = GameObject.Instantiate(playerPrefab, Player.respawnLocation, Quaternion.identity);
-        GetComponent<FollowCam>().player = player;
+        player.transform.position = Player.respawnLocation;
+        player.SetActive(true);
     }
 }

@@ -13,6 +13,7 @@ public class Player : MonoBehaviour {
     public float wallJumpHorzVel;
     public float rayLengthOutsideOfPlayer;
     public float respawnDelay;
+    public float deathHeight; //Y value at which the player dies and respawns at the last checkpoint
     
     public bool _______________________;
 
@@ -21,7 +22,6 @@ public class Player : MonoBehaviour {
     ConstantForce moveForward;
     bool grounded;
     bool jumping = false;
-    Vector3 counterGravity = -Physics.gravity * 2;
 
     // Use this for initialization
     void Start () {
@@ -38,6 +38,11 @@ public class Player : MonoBehaviour {
 
     void FixedUpdate () {
         grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer);
+
+        if (transform.position.y < deathHeight) {
+            //player has fallen off map, respawn
+            Respawn();
+        }
         
         if (!grounded) {
             //stop applying force if not grounded
@@ -59,9 +64,13 @@ public class Player : MonoBehaviour {
 
     public void OnTriggerEnter(Collider coll) {
         if (coll.tag == "Hazard") {
-            MainGameController.S.RespawnWithDelay(respawnDelay);
-            Destroy(this.gameObject);
+            Respawn();
         }
+    }
+
+    private void Respawn() {
+        MainGameController.S.RespawnWithDelay(respawnDelay);
+        gameObject.SetActive(false);
     }
 
     //called by an event trigger attached to "Event Grabber"
