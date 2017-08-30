@@ -55,7 +55,7 @@ public class Player : MonoBehaviour {
 
         if (transform.position.y < deathHeight) {
             //player has fallen off map, respawn
-            Respawn();
+            PlayerDied();
         }
         
         if (!grounded) {
@@ -90,42 +90,48 @@ public class Player : MonoBehaviour {
 
     public void OnTriggerEnter(Collider coll) {
         if (coll.tag == "Hazard") {
-            Respawn();
+            PlayerDied();
         }
         if (coll.tag == "Checkpoint") {
             respawnLocation = coll.transform.position;
         }
     }
 
-    private void Respawn() {
-        MainGameController.S.RespawnWithDelay(respawnDelay);
+    private void PlayerDied() {
         jumping = false;
         rigid.velocity = Vector3.zero;
         gameObject.SetActive(false);
+		Invoke ("RespawnPlayer", respawnDelay);
     }
+
+	private void RespawnPlayer() {
+		transform.position = respawnLocation;
+		gameObject.SetActive(true);
+	}
 
     //called by an event trigger attached to "Event Grabber"
     public void PointerDown() {
-        //if on ground, jump
-		grounded = Physics.Raycast(transform.position, Vector3.down, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Default"));
-		wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
-		wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
-        jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
-        if (grounded) {
-            print("Jump");
-            rigid.velocity = new Vector3(rigid.velocity.x, tapJumpVelocity, 0);
-        } else if (wallRight) {
-            print("Wall Jump from right wall");
-            rigid.velocity = new Vector3(-wallJumpHorzVel, wallJumpVertVel, 0);
-        } else if (wallLeft) {
-            print("Wall Jump from left wall");
-            rigid.velocity = new Vector3(wallJumpHorzVel, wallJumpVertVel, 0);
-        }
+        //if on ground and active in the scene, jump
+		if (gameObject.activeSelf) {
+			grounded = Physics.Raycast (transform.position, Vector3.down, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Default"));
+			wallRight = Physics.Raycast (transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Wall", "Default"));
+			wallLeft = Physics.Raycast (transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Wall", "Default"));
+			jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
+			if (grounded) {
+				//print("Jump");
+				rigid.velocity = new Vector3 (rigid.velocity.x, tapJumpVelocity, 0);
+			} else if (wallRight) {
+				//print("Wall Jump from right wall");
+				rigid.velocity = new Vector3 (-wallJumpHorzVel, wallJumpVertVel, 0);
+			} else if (wallLeft) {
+				//print("Wall Jump from left wall");
+				rigid.velocity = new Vector3 (wallJumpHorzVel, wallJumpVertVel, 0);
+			}
+		}
     }
 
     //called by an event trigger attached to "Event Grabber"
     public void PointerUp() {
-        print("Stop Jumping");
         jumping = false;
     }
 
