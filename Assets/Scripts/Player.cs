@@ -20,6 +20,7 @@ public class Player : MonoBehaviour {
     public bool _______________________;
 
     public Vector3 respawnLocation;
+	public float MAXJUMPHEIGHT;
 
     Rigidbody rigid;    
     SphereCollider playerColl;
@@ -35,6 +36,7 @@ public class Player : MonoBehaviour {
         playerColl = GetComponent<SphereCollider>();
         moveForward = GetComponent<ConstantForce>();
         respawnLocation = transform.position;
+		MAXJUMPHEIGHT = -(tapJumpVelocity * tapJumpVelocity) / (2 * (Physics.gravity.y - gravIncrease + holdJumpAccel));
     }
 
 	void OnDrawGizmos() {
@@ -48,8 +50,8 @@ public class Player : MonoBehaviour {
 
     void FixedUpdate () {
         grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Default"));
-        wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall"));
-        wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall"));
+        wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
+		wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
 
         if (transform.position.y < deathHeight) {
             //player has fallen off map, respawn
@@ -106,8 +108,8 @@ public class Player : MonoBehaviour {
     public void PointerDown() {
         //if on ground, jump
 		grounded = Physics.Raycast(transform.position, Vector3.down, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Default"));
-		wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall"));
-		wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall"));
+		wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
+		wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
         jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
         if (grounded) {
             print("Jump");
@@ -126,4 +128,12 @@ public class Player : MonoBehaviour {
         print("Stop Jumping");
         jumping = false;
     }
+
+	public float getMaxJumpHeight() {
+		return -(tapJumpVelocity * tapJumpVelocity) / (2 * (Physics.gravity.y - gravIncrease + holdJumpAccel));
+	}
+
+	public bool isGrounded() {
+		return grounded;
+	}
 }
