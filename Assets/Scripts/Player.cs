@@ -16,7 +16,6 @@ public class Player : MonoBehaviour {
     public float gravIncrease;
     public float speedWhereHoldToJumpCancels;
     public float wallUpwardForce;
-    public float wallHugForce;
     
     public bool _______________________;
 
@@ -72,10 +71,12 @@ public class Player : MonoBehaviour {
             }
             if ((wallRight || wallLeft) && rigid.velocity.y < 0) {
                 //apply wall friction force to allow "hugging" and slow sliding down walls
-                rigid.AddForce((wallRight ? Vector3.right : Vector3.left) * wallHugForce, ForceMode.Acceleration);
+				Vector3 removeXVel = rigid.velocity;
+				removeXVel.x = 0;
+				rigid.velocity = removeXVel;
                 rigid.AddForce(Vector3.up * wallUpwardForce, ForceMode.Force);
 
-				if (rigid.velocity.y < maxWallSpeed) {
+				if (rigid.velocity.y < -maxWallSpeed) {
 					//wall speed is moving downward so use negatives
 					Vector3 maxVel = new Vector3 (rigid.velocity.x, -maxWallSpeed, 0);
 					rigid.velocity = maxVel;
