@@ -106,6 +106,10 @@ public class Player : MonoBehaviour {
 		if (coll.tag == "Finish") {
 			MainGameController.S.LevelComplete ();
 		}
+		if (coll.tag == "Coin") {
+			//TODO: collect coin
+			Destroy(coll.gameObject);
+		}
     }
 
     private void PlayerDied() {

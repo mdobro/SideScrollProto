@@ -9,6 +9,10 @@ public class MainGameController : MonoBehaviour {
 
     public GameObject player;
 
+	void Awake () {
+		Application.targetFrameRate = 60;
+	}
+
 	// Use this for initialization
 	void Start () {
         S = this;	
