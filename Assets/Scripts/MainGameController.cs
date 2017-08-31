@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MainGameController : MonoBehaviour {
 
@@ -18,12 +19,10 @@ public class MainGameController : MonoBehaviour {
 		
 	}
 
-    public void RespawnWithDelay(float time) {
-        Invoke("RespawnPlayer", time);
-    }
-
-    private void RespawnPlayer() {
-        player.transform.position = player.GetComponent<Player>().respawnLocation;
-        player.SetActive(true);
-    }
+	public void LevelComplete () {
+		int nextSceneIndex = SceneManager.GetActiveScene ().buildIndex + 1;
+		if (SceneManager.sceneCountInBuildSettings > nextSceneIndex) {
+			SceneManager.LoadScene (nextSceneIndex);
+		}
+	}
 }

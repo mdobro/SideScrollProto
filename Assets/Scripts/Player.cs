@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour {
 
     public float maxSpeed;
+	public float maxWallSpeed;
     public float tapJumpVelocity;
     public float holdJumpAccel;
     public float wallJumpVertVel;
@@ -49,9 +50,9 @@ public class Player : MonoBehaviour {
 	}
 
     void FixedUpdate () {
-        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Default"));
-        wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
-		wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Wall", "Default"));
+        grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Surface"));
+		wallRight = Physics.Raycast(transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Surface"));
+		wallLeft = Physics.Raycast(transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Surface"));
 
         if (transform.position.y < deathHeight) {
             //player has fallen off map, respawn
@@ -73,6 +74,12 @@ public class Player : MonoBehaviour {
                 //apply wall friction force to allow "hugging" and slow sliding down walls
                 rigid.AddForce((wallRight ? Vector3.right : Vector3.left) * wallHugForce, ForceMode.Acceleration);
                 rigid.AddForce(Vector3.up * wallUpwardForce, ForceMode.Force);
+
+				if (rigid.velocity.y < maxWallSpeed) {
+					//wall speed is moving downward so use negatives
+					Vector3 maxVel = new Vector3 (rigid.velocity.x, -maxWallSpeed, 0);
+					rigid.velocity = maxVel;
+				}
             }
         } else {
             //move forward
@@ -95,6 +102,9 @@ public class Player : MonoBehaviour {
         if (coll.tag == "Checkpoint") {
             respawnLocation = coll.transform.position;
         }
+		if (coll.tag == "Finish") {
+			MainGameController.S.LevelComplete ();
+		}
     }
 
     private void PlayerDied() {
@@ -113,9 +123,9 @@ public class Player : MonoBehaviour {
     public void PointerDown() {
         //if on ground and active in the scene, jump
 		if (gameObject.activeSelf) {
-			grounded = Physics.Raycast (transform.position, Vector3.down, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Default"));
-			wallRight = Physics.Raycast (transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Wall", "Default"));
-			wallLeft = Physics.Raycast (transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Wall", "Default"));
+			grounded = Physics.Raycast (transform.position, Vector3.down, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Surface"));
+			wallRight = Physics.Raycast (transform.position, Vector3.right, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Surface"));
+			wallLeft = Physics.Raycast (transform.position, Vector3.left, playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask ("Surface"));
 			jumping = grounded ? grounded : wallRight ? wallRight : wallLeft ? wallLeft : false;
 			if (grounded) {
 				//print("Jump");
