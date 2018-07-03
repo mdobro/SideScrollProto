@@ -22,6 +22,8 @@ public class Player : MonoBehaviour {
     public Vector3 respawnLocation;
 	public float MAXJUMPHEIGHT;
 
+	float coinCount = 0;
+
     Rigidbody rigid;    
     SphereCollider playerColl;
     ConstantForce moveForward;
@@ -46,7 +48,7 @@ public class Player : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	    	
-	}
+    }
 
     void FixedUpdate () {
         grounded = Physics.Raycast(transform.position, new Vector3(0, -1, 0), playerColl.radius + rayLengthOutsideOfPlayer, LayerMask.GetMask("Surface"));
@@ -107,7 +109,7 @@ public class Player : MonoBehaviour {
 			MainGameController.S.LevelComplete ();
 		}
 		if (coll.tag == "Coin") {
-			//TODO: collect coin
+			coinCount++;
 			Destroy(coll.gameObject);
 		}
     }
